@@ -41,7 +41,7 @@ export class ProductsService {
       });
   }
 
-  async searchProducts(query: string): Promise<Product[]> {
+  searchProducts(query: string): Product[] {
     const lowerQuery = query.toLowerCase();
 
     const results = this.products.filter((p) => {
