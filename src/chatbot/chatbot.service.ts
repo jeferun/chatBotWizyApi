@@ -101,7 +101,12 @@ export class ChatbotService {
             if (toolCall.type !== 'function') continue;
 
             const functionName = toolCall.function.name;
-            const functionArgs = JSON.parse(toolCall.function.arguments);
+            const functionArgs = JSON.parse(toolCall.function.arguments) as {
+              query?: string;
+              price?: number;
+              from?: string;
+              to?: string;
+            };
             let functionResponse = '';
 
             this.logger.log(
@@ -110,15 +115,15 @@ export class ChatbotService {
 
             // Execute the function locally
             if (functionName === 'searchProducts') {
-              const products = await this.productsService.searchProducts(
-                functionArgs.query,
+              const products = this.productsService.searchProducts(
+                functionArgs.query || '',
               );
               functionResponse = JSON.stringify(products);
             } else if (functionName === 'convertCurrencies') {
               const result = await this.currencyService.convertCurrencies(
-                functionArgs.price,
-                functionArgs.from,
-                functionArgs.to,
+                functionArgs.price || 0,
+                functionArgs.from || '',
+                functionArgs.to || '',
               );
               functionResponse = JSON.stringify({ result });
             }

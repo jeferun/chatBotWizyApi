@@ -9,7 +9,8 @@ describe('CurrencyService', () => {
     // Mock global fetch
     global.fetch = jest.fn(() =>
       Promise.resolve({
-        json: () => Promise.resolve({ rates: { USD: 1, EUR: 0.85, CAD: 1.25 } }),
+        json: () =>
+          Promise.resolve({ rates: { USD: 1, EUR: 0.85, CAD: 1.25 } }),
       }),
     ) as jest.Mock;
 

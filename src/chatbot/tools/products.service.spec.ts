@@ -12,10 +12,23 @@ describe('ProductsService', () => {
     service = module.get<ProductsService>(ProductsService);
 
     // Inject mocked data into memory to avoid depending on the real CSV in the test
-    (service as any).products = [
-      { displayTitle: 'iPhone 13', embeddingText: 'Apple phone', productType: 'electronics' },
-      { displayTitle: 'Samsung S21', embeddingText: 'Android phone', productType: 'electronics' },
-      { displayTitle: 'MacBook Pro', embeddingText: 'Laptop', productType: 'computers' },
+
+    service['products'] = [
+      {
+        displayTitle: 'iPhone 13',
+        embeddingText: 'Apple phone',
+        productType: 'electronics',
+      },
+      {
+        displayTitle: 'Samsung S21',
+        embeddingText: 'Android phone',
+        productType: 'electronics',
+      },
+      {
+        displayTitle: 'MacBook Pro',
+        embeddingText: 'Laptop',
+        productType: 'computers',
+      },
     ] as Product[];
   });
 
@@ -23,14 +36,14 @@ describe('ProductsService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should find products by query and limit to 2', async () => {
-    const results = await service.searchProducts('phone');
+  it('should find products by query and limit to 2', () => {
+    const results = service.searchProducts('phone');
     expect(results.length).toBe(2);
     expect(results[0].displayTitle).toBe('iPhone 13');
   });
 
-  it('should find products by type', async () => {
-    const results = await service.searchProducts('computers');
+  it('should find products by type', () => {
+    const results = service.searchProducts('computers');
     expect(results.length).toBe(1);
     expect(results[0].displayTitle).toBe('MacBook Pro');
   });

@@ -33,6 +33,8 @@ API endpoint construido con **NestJS (TypeScript)** que se comunica con la API d
 ## 🏃 Ejecución de la Aplicación
 
 ```bash
+npm install
+
 # Desarrollo
 npm run start
 
