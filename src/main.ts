@@ -9,6 +9,9 @@ async function bootstrap() {
   // Enable global validation pipe
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
+  // Enable CORS so the Frontend on port 3001 can talk to this Backend on port 3000
+  app.enableCors();
+
   // Configure Swagger
   const config = new DocumentBuilder()
     .setTitle('Chatbot Wizy API')
@@ -21,4 +24,6 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 3000);
 }
-bootstrap();
+bootstrap().catch((err) => {
+  console.error(err);
+});

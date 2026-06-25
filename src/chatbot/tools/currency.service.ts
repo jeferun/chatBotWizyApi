@@ -7,18 +7,26 @@ export class CurrencyService {
 
   constructor(private configService: ConfigService) {}
 
-  async convertCurrencies(price: number, from: string, to: string): Promise<number> {
+  async convertCurrencies(
+    price: number,
+    from: string,
+    to: string,
+  ): Promise<number> {
     const appId = this.configService.get<string>('OPEN_EXCHANGE_RATES_APP_ID');
     if (!appId) {
       throw new Error('OPEN_EXCHANGE_RATES_APP_ID is not configured');
     }
 
-    try {
-      const response = await fetch(`https://openexchangerates.org/api/latest.json?app_id=${appId}`);
-      const data = await response.json();
+    const url = `https://openexchangerates.org/api/latest.json?app_id=${appId}`;
 
-      if (!data || !data.rates) {
-        throw new Error('Failed to fetch exchange rates');
+    try {
+      const response = await fetch(url);
+      const data = (await response.json()) as {
+        rates?: Record<string, number>;
+      };
+
+      if (!data.rates) {
+        throw new Error('Invalid response from currency API');
       }
 
       const rates = data.rates;
@@ -26,17 +34,17 @@ export class CurrencyService {
       const rateTo = rates[to];
 
       if (!rateFrom || !rateTo) {
-        throw new Error(`Unsupported currency conversion: ${from} to ${to}`);
+        throw new Error('Currency code not found in rates');
       }
 
-      // Convert via base currency (USD usually in free tier)
-      const priceInUsd = price / rateFrom;
-      const finalPrice = priceInUsd * rateTo;
+      const priceInUSD = price / rateFrom;
+      const finalPrice = priceInUSD * rateTo;
 
-      return parseFloat(finalPrice.toFixed(2));
-    } catch (error) {
-      this.logger.error(`Error converting currencies: ${error.message}`);
-      throw error;
+      return Number(finalPrice.toFixed(2));
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Currency conversion error: ${msg}`);
+      throw new Error(`Failed to convert currency: ${msg}`);
     }
   }
 }

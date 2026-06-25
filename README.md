@@ -1,6 +1,6 @@
 # ChatBot Wizy API
 
-Este repositorio contiene la solución a la prueba técnica para el puesto de Fullstack Developer en Wizybot. Consiste en un API endpoint construido con **NestJS (TypeScript)** que se comunica con la API de OpenAI (Chat Completion) y utiliza Function Calling para proporcionar a un agente de IA herramientas específicas.
+API endpoint construido con **NestJS (TypeScript)** que se comunica con la API de OpenAI (Chat Completion) y utiliza Function Calling para proporcionar a un agente de IA herramientas específicas.
 
 ## Herramientas del Agente
 1. `searchProducts(query)`: Lee y busca productos dentro de `products_list.csv`.

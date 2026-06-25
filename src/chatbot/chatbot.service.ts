@@ -20,11 +20,12 @@ export class ChatbotService {
 
   async handleChat(userQuery: string): Promise<string> {
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-      { 
-        role: 'system', 
-        content: 'You are a helpful customer support and sales AI assistant for Wizybot. Use tools to find products and convert currencies when needed.' 
+      {
+        role: 'system',
+        content:
+          'You are a helpful customer support agent for WizyBot store. You can search products and convert currencies. CRITICAL RULE: Whenever you mention a product from the database, you MUST ALWAYS include its image using markdown: ![alt](imageUrl), a link to it, and explicitly list its available "variants" (colors, sizes, etc.) if they are provided in the data.',
       },
-      { role: 'user', content: userQuery }
+      { role: 'user', content: userQuery },
     ];
 
     const tools: OpenAI.Chat.ChatCompletionTool[] = [
@@ -32,15 +33,20 @@ export class ChatbotService {
         type: 'function',
         function: {
           name: 'searchProducts',
-          description: 'Search for products based on a user query. Returns max 2 items.',
+          description:
+            'Search for products based on a user query. Returns max 2 items.',
           parameters: {
             type: 'object',
             properties: {
-              query: { type: 'string', description: 'The search term for the product, e.g. "phone" or "watch"' }
+              query: {
+                type: 'string',
+                description:
+                  'The search term for the product, e.g. "phone" or "watch"',
+              },
             },
-            required: ['query']
-          }
-        }
+            required: ['query'],
+          },
+        },
       },
       {
         type: 'function',
@@ -50,14 +56,25 @@ export class ChatbotService {
           parameters: {
             type: 'object',
             properties: {
-              price: { type: 'number', description: 'The price amount to convert' },
-              from: { type: 'string', description: 'The 3-letter currency code to convert from, e.g. USD, EUR' },
-              to: { type: 'string', description: 'The 3-letter currency code to convert to, e.g. CAD, EUR' }
+              price: {
+                type: 'number',
+                description: 'The price amount to convert',
+              },
+              from: {
+                type: 'string',
+                description:
+                  'The 3-letter currency code to convert from, e.g. USD, EUR',
+              },
+              to: {
+                type: 'string',
+                description:
+                  'The 3-letter currency code to convert to, e.g. CAD, EUR',
+              },
             },
-            required: ['price', 'from', 'to']
-          }
-        }
-      }
+            required: ['price', 'from', 'to'],
+          },
+        },
+      },
     ];
 
     try {
@@ -74,21 +91,28 @@ export class ChatbotService {
 
         const responseMessage = response.choices[0].message;
 
-        if (responseMessage.tool_calls && responseMessage.tool_calls.length > 0) {
+        if (
+          responseMessage.tool_calls &&
+          responseMessage.tool_calls.length > 0
+        ) {
           messages.push(responseMessage); // Important: append assistant's tool calls to conversation
 
           for (const toolCall of responseMessage.tool_calls) {
             if (toolCall.type !== 'function') continue;
-            
+
             const functionName = toolCall.function.name;
             const functionArgs = JSON.parse(toolCall.function.arguments);
             let functionResponse = '';
 
-            this.logger.log(`LLM requested function: ${functionName} with args: ${JSON.stringify(functionArgs)}`);
+            this.logger.log(
+              `LLM requested function: ${functionName} with args: ${JSON.stringify(functionArgs)}`,
+            );
 
             // Execute the function locally
             if (functionName === 'searchProducts') {
-              const products = await this.productsService.searchProducts(functionArgs.query);
+              const products = await this.productsService.searchProducts(
+                functionArgs.query,
+              );
               functionResponse = JSON.stringify(products);
             } else if (functionName === 'convertCurrencies') {
               const result = await this.currencyService.convertCurrencies(
@@ -109,13 +133,15 @@ export class ChatbotService {
         } else {
           // No more tool calls, exit loop
           keepCalling = false;
-          finalResponse = responseMessage.content || 'I could not generate a response.';
+          finalResponse =
+            responseMessage.content || 'I could not generate a response.';
         }
       }
 
       return finalResponse;
-    } catch (error) {
-      this.logger.error(`Error in ChatbotService: ${error.message}`);
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error in ChatbotService: ${msg}`);
       throw error;
     }
   }

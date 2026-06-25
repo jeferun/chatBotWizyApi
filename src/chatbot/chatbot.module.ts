@@ -6,6 +6,6 @@ import { CurrencyService } from './tools/currency.service';
 
 @Module({
   controllers: [ChatbotController],
-  providers: [ChatbotService, ProductsService, CurrencyService]
+  providers: [ChatbotService, ProductsService, CurrencyService],
 })
 export class ChatbotModule {}
